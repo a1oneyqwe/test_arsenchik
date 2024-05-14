@@ -1,31 +1,38 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using ProjectName;
+using Microsoft.EntityFrameworkCore;
+using test;
+using test.Repositories; // Импорт вашего текущего проекта
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();
-// Add your DbContext and repositories
-// AddSwaggerGen is not needed as we're using endpoint routing instead of MVC-style routing
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// Add your DbContext
+string connectionString = "Server=db-mssql.pjwstk.edu.pl;Database=2019 SBD;User Id=s29076;Password=504706Mi!";
+builder.Services.AddDbContext<YourDbContext>(options =>
+    options.UseSqlServer(connectionString));
+
+// Add repositories
+builder.Services.AddScoped<ITaskRepository, TaskRepository>();
+// Add other repositories as needed
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseDeveloperExceptionPage();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
-// Add endpoints to the application
 app.UseHttpsRedirection();
-app.UseRouting();
-app.UseAuthorization();
 
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers();
-});
+// Configure controllers
+app.MapControllers();
 
 app.Run();
